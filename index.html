@@ -23,13 +23,17 @@
     
       <section>
         <h2>Filter Transactions</h2>
-        <form>
+        <form id="filter-form">
           <label for="transactionType" >Transaction Type:</label>
           <select id="transactionType" name="transactionType">
             <option value="all">All</option>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
+            <label for="transactionType" >Currency:</label>
+
           </select>
+          <select id="currencyFilterForm" name="currency">
+        </select>
     
           <label for="minAmount">From:</label>
           <input type="text" id="minAmount" name="minAmount" placeholder="Min Amount">
@@ -51,9 +55,9 @@
       </header>
     
       <section class="add-transaction">
-        <form  method="post">
+        <form  method="post" id="add-form">
           <label for="transactionType">Transaction Type:</label>
-          <select id="transactionType" name="transactionType" required>
+          <select id="type" name="transactionType" required>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
           </select>
@@ -66,16 +70,14 @@
     
           <label for="currency">Currency:</label>
           <select id="currency" name="currency" required>
-            <option value="usd">USD</option>
-            <option value="eur">EUR</option>
-            <option value="lbp">LBP</option>
-            <!-- Add more currency options as needed -->
+
           </select>
     
           <button type="submit" id="addTransaction">Add Transaction</button>
         </form>
       </section>
       <script src="./scripts/index.js" ></script>
+      <script src="./scripts/fetchCurrencies.js" ></script>
 
 </body>
 </html>
