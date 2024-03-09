@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./styles/index.css">
+
+    <title>Expense Tracker</title>
+</head>
+<body>
+    <header>
+        <h1>User Transactions</h1>
+      </header>
+    
+      <!-- <nav>
+        <a href="#">Home</a>
+        <a href="#">View Transactions</a>
+        <a href="#">Add Transaction</a>
+        <a href="#">Filter Transactions</a>
+        <a href="#">Delete Transactions</a>
+        <a href="#">Currency Converter</a>
+      </nav>    -->
+    
+      <section>
+        <h2>Filter Transactions</h2>
+        <form>
+          <label for="transactionType" >Transaction Type:</label>
+          <select id="transactionType" name="transactionType">
+            <option value="all">All</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+    
+          <label for="minAmount">From:</label>
+          <input type="text" id="minAmount" name="minAmount" placeholder="Min Amount">
+    
+          <label for="maxAmount">To:</label>
+          <input type="text" id="maxAmount" name="maxAmount" placeholder="Max Amount">
+    
+          <button type="submit">Apply Filters</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Transaction History</h2>
+        <div id="transaction-table"></div>
+      </section>
+
+      <header>
+        <h1>Add New Transaction</h1>
+      </header>
+    
+      <section class="add-transaction">
+        <form  method="post">
+          <label for="transactionType">Transaction Type:</label>
+          <select id="transactionType" name="transactionType" required>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+    
+          <label for="amount">Amount:</label>
+          <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+    
+          <label for="description">Description:</label>
+          <textarea id="description" name="description" placeholder="Enter description"></textarea>
+    
+          <label for="currency">Currency:</label>
+          <select id="currency" name="currency" required>
+            <option value="usd">USD</option>
+            <option value="eur">EUR</option>
+            <option value="lbp">LBP</option>
+            <!-- Add more currency options as needed -->
+          </select>
+    
+          <button type="submit" id="addTransaction">Add Transaction</button>
+        </form>
+      </section>
+      <script src="./scripts/index.js" ></script>
+
+</body>
+</html>
