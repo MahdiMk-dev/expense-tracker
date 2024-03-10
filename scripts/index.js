@@ -1,44 +1,69 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Ensure the DOM is fully loaded before accessing elements
+    isLoggedIn();
     displayTransactions();
-  
+    
     function displayTransactions(filteredTransactions) {
-      const transactions = filteredTransactions || JSON.parse(localStorage.getItem('transactions')) || [];
-//adding data in table form.
+      // If filteredTransactions is not provided, retrieve transactions from local storage
+      const alltransactions = filteredTransactions || JSON.parse(localStorage.getItem('transactions')) || [];
+      console.log(alltransactions)
+      userid=localStorage.getItem('sessionToken');
+      transactions=alltransactions.filter(transaction => transaction.userid == userid)
+      console.log(userid)
+      console.log(transactions)
+      if (!Array.isArray(transactions)) {
+        transactions=[transactions]
+      }
+      // Create an HTML table
       const table = document.createElement('table');
       table.classList.add('transaction-table');
   
+      // Create table header
       const headerRow = table.insertRow();
       Object.keys(transactions[0] || {}).forEach(key => {
         const th = document.createElement('th');
         th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
         headerRow.appendChild(th);
       });
-//delete button for each transaction is included in table for easy access
+      // Add an additional column for the delete button
       const deleteTh = document.createElement('th');
       deleteTh.textContent = 'Actions';
       headerRow.appendChild(deleteTh);
   
+      // Create table rows with transaction data
       transactions.forEach(transaction => {
         const row = table.insertRow();
+        row.setAttribute('id',transaction.id);
         Object.values(transaction).forEach(value => {
           const cell = row.insertCell();
           cell.textContent = value;
         });
   
-        // Add delete button as mentioned
+        // Add delete button to each row
         const deleteCell = row.insertCell();
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('delete-button');
         deleteButton.addEventListener('click', function() {
-          deleteTransaction(transactions.indexOf(transaction));
+          deleteTransaction(row.getAttribute('id'));
         });
         deleteCell.appendChild(deleteButton);
+
+
+        const updateButton = document.createElement('button');
+        updateButton.textContent = 'Edit';
+        updateButton.classList.add('edit-button');
+        updateButton.addEventListener('click', function() {
+          UpdateTransaction(row.getAttribute('id'));
+        });
+        deleteCell.appendChild(updateButton);
       });
   
       // Append the table to the container
       const tableContainer = document.getElementById('transaction-table');
-      tableContainer.innerHTML = ''; // reset
+      tableContainer.innerHTML = ''; // Clear previous content
       tableContainer.appendChild(table);
+      TotalUSD(filteredTransactions);
     }
   
     const filterForm = document.getElementById('filter-form');
@@ -51,73 +76,132 @@ document.addEventListener('DOMContentLoaded', function() {
       const maxAmount = parseFloat(document.getElementById('maxAmount').value) || Infinity;
       const selectedCurrency = document.getElementById('currencyFilterForm').value;
   
+      // Retrieve transactions from local storage
       const allTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
+      userid=localStorage.getItem('sessionToken');
   
-      // Apply filters on data in local storage
+      // Apply filters
       const filteredTransactions = allTransactions.filter(transaction => {
         const typeCondition = filterType === 'all' || transaction.type === filterType;
         const amountCondition = transaction.amount >= minAmount && transaction.amount <= maxAmount;
         const currencyCondition = selectedCurrency === 'all' || transaction.currency === selectedCurrency;
-  
-        return typeCondition && amountCondition && currencyCondition;
+        const userCondition = transaction.userid==userid
+        return typeCondition && amountCondition && currencyCondition && userCondition;
       });
+      console.log("filter")
+      console.log(filteredTransactions);
   
       displayTransactions(filteredTransactions);
     });
   
-    const form = document.getElementById('add-form');
-    form.addEventListener('submit', handleFormSubmit);
+
+    function deleteTransaction(id) {
+      // Retrieve existing transactions from local storage
+      console.log(id)
+      const existingTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
+      transactions = existingTransactions.filter(transaction => transaction.id != id);
+      console.log(transactions)
+
   
-    function handleFormSubmit(event) {
-      event.preventDefault(); 
+      // Save the updated array back to local storage
+      localStorage.setItem('transactions', JSON.stringify(transactions));
+      TotalUSD();
+      // Display the updated transactions
+      displayTransactions();
+    }
+    function UpdateTransaction(index) {
+      // Retrieve existing transactions from local storage
+      window.location.href = "./update_transaction.html?id="+index;
+    }
+
+
   
-      // Get form values
-      const type = document.getElementById('type').value;
-      const amount = parseFloat(document.getElementById('amount').value);
-      const description = document.getElementById('description').value;
-      const currency = document.getElementById('currency').value;
-  
-      // Validate form values 
-      if (isNaN(amount) || amount <= 0) {
-        alert('Please enter a valid positive amount.');
-        return;
-      }
-  
-      const transaction = {
-        type: type,
-        amount: amount,
-        description: description,
-        currency: currency
+    function TotalUSD(filteredTransactions) {
+      console.log("totsl")
+        let total=0;
+        const myDiv = document.getElementById('total');
+                myDiv.innerHTML = 'Total in USD: '+total+' $';
+      // If filteredTransactions is not provided, retrieve transactions from local storage
+      const transactions = filteredTransactions || JSON.parse(localStorage.getItem('transactions')).filter(transaction => transaction.userid == userid)  || [];
+      console.log(transactions)
+      transactions.forEach(transaction => {
+
+      // Prepare the data for the API request
+      const requestData = {
+        from: transaction.currency,
+        to: "USD",
+        amount: transaction.amount
       };
   
-      const existingTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  
-      existingTransactions.push(transaction);
-  
-      localStorage.setItem('transactions', JSON.stringify(existingTransactions));
-  
-      alert('Transaction added successfully!');
-  
-      // Clear the form for the next entry
-      form.reset();
-      displayTransactions(); // Display all transactions after adding a new one
+      // Fetch conversion rates from the API
+      fetch('https://rich-erin-angler-hem.cyclic.app/students/convert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      })
+        .then(response => {
+          console.log(response)
+          // Check if the response is successful (status code in the range 200-299)
+          if (response.ok) {
+
+               console.log('ok') // Parse the JSON response
+               return response.json();
+          }
+          throw new Error('Network response was not ok.');
+        })
+        .then(data => {
+          console.log('converted amount is : '+data)
+          // Display the converted amount
+          if(transaction.type=='income')
+            total+=data;
+          else 
+            total-=data;
+          console.log("------"+total)
+                const myDiv = document.getElementById('total');
+                myDiv.innerHTML = 'Total in USD: '+total+' $';
+        })
+        .catch(error => {
+
+          console.error('Error converting currencies:', error);
+        });
+       
+      });
+
+      
     }
-  
-    function deleteTransaction(index) {
-      const existingTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
-  
-      existingTransactions.splice(index, 1);
-  
-      localStorage.setItem('transactions', JSON.stringify(existingTransactions));
-  
-      displayTransactions(existingTransactions);
-    }
-  
-    function fetchCurrencies() {
+    // Function to check if the user is logged in
+    function isLoggedIn() {
+      // Check if the session token is present in localStorage
+      userid=localStorage.getItem('sessionToken');
+      console.log(userid)
+      const storedUsers = localStorage.getItem('user');
+      if (storedUsers) {
+        users = JSON.parse(storedUsers);
+
+        console.log(users)
+      }
+
+      if(storedUsers && users.find(user => user.id == userid)){
+        console.log('yes')
+        return true;
+      }
+      else
+         window.location.href = "./login.html";
 
     }
-  
-    const addTransactionBtn = document.getElementById('addTransaction');
-    addTransactionBtn.addEventListener('click', addTransaction);
+
+
+    fetchCurrenciesFilter();
+    function fetchCurrenciesFilter(){
+      fetchCurrencies()
+      .then(data => {
+        if (data) {
+          // Add fetched currencies to the specified form
+          addCurrenciesToForm(data, 'filter-form');
+        }
+      });
+    }
   });
   

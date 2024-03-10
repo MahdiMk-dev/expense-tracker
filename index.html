@@ -12,18 +12,15 @@
         <h1>User Transactions</h1>
       </header>
     
-      <!-- <nav>
-        <a href="#">Home</a>
-        <a href="#">View Transactions</a>
-        <a href="#">Add Transaction</a>
-        <a href="#">Filter Transactions</a>
-        <a href="#">Delete Transactions</a>
-        <a href="#">Currency Converter</a>
-      </nav>    -->
+       <nav>
+        <a href="./index.html">Home</a>
+        <a href="./add_transaction.html">Add Transactions</a>
+        <button id="logoutButton">Logout</button>
+      </nav>
     
       <section>
         <h2>Filter Transactions</h2>
-        <form id="filter-form">
+        <form id="filter-form" class="filter-form">
           <label for="transactionType" >Transaction Type:</label>
           <select id="transactionType" name="transactionType">
             <option value="all">All</option>
@@ -48,36 +45,13 @@
       <section>
         <h2>Transaction History</h2>
         <div id="transaction-table"></div>
+        <div class="total" id="total">Total in USD:</div>
       </section>
-
-      <header>
-        <h1>Add New Transaction</h1>
-      </header>
-    
-      <section class="add-transaction">
-        <form  method="post" id="add-form">
-          <label for="transactionType">Transaction Type:</label>
-          <select id="type" name="transactionType" required>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
-    
-          <label for="amount">Amount:</label>
-          <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
-    
-          <label for="description">Description:</label>
-          <textarea id="description" name="description" placeholder="Enter description"></textarea>
-    
-          <label for="currency">Currency:</label>
-          <select id="currency" name="currency" required>
-
-          </select>
-    
-          <button type="submit" id="addTransaction">Add Transaction</button>
-        </form>
-      </section>
-      <script src="./scripts/index.js" ></script>
+      <script src="./scripts/convertCurrencies.js" ></script>
       <script src="./scripts/fetchCurrencies.js" ></script>
+      <script src="./scripts/index.js" ></script>
+      <script src="./scripts/logout.js"></script> 
+      
 
 </body>
 </html>
